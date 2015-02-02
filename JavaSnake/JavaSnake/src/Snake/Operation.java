@@ -1,6 +1,7 @@
 package Snake;
 
 import java.awt.Color;
+import java.util.ArrayList;
 import java.util.Random;
 
 import javax.swing.JLabel;
@@ -9,11 +10,9 @@ public class Operation {
 	/**
 	 * @wbp.parser.entryPoint
 	 */
-	private int[][] flag; // 0 presents nothing, 1~n presents snake, -1 presents
+	private int[][] flag; // 0 presents nothing, 1 presents snake, -1 presents
 							// the food,
-	private int pos_i, pos_j; /* 蛇头坐标 */
-	private int next_i, next_j;
-	private int size;
+	private ArrayList<Position> snakePos; // 蛇的坐标
 	private int maxn;
 	private MoveInformation moveInformation;
 	private JLabel[][] text;
@@ -25,6 +24,7 @@ public class Operation {
 		for (int i = 0; i < maxn; i++)
 			for (int j = 0; j < maxn; j++)
 				flag[i][j] = 0;
+		snakePos = new ArrayList<Position>();
 	}
 
 	public void setMoveInformation(MyListener myListener) {
@@ -58,56 +58,27 @@ public class Operation {
 			x = random.nextInt(20);
 			y = random.nextInt(20);
 		}
-		pos_i = x;
-		pos_j = y;
-		size = 1;
+		Position headPos = new Position(x, y);
+		snakePos.add(headPos);
 		flag[x][y] = 1;
 		text[x][y].setBackground(Color.BLACK);
 		// text[x][y].setBorder(BorderFactory.createLineBorder(Color.WHITE));
 	}
 
-	public void get_nextPos(int i, int j, int num) {
-		if (i > 0 && flag[i - 1][j] == num) {
-			next_i = i - 1;
-			next_j = j;
-			return;
-		}
-		if (i > 0 && j > 0 && flag[i - 1][j - 1] == num) {
-			next_i = i - 1;
-			next_j = j - 1;
-			return;
-		}
-		if (i > 0 && j < 19 && flag[i - 1][j + 1] == num) {
-			next_i = i - 1;
-			next_j = j - 1;
-			return;
-		}
-		if (j > 0 && flag[i][j - 1] == num) {
-			next_i = i - 1;
-			next_j = j - 1;
-			return;
-		}
-		if (j < 19 && flag[i][j + 1] == num) {
-			next_i = i - 1;
-			next_j = j - 1;
-			return;
-		}
-		if (i < 19 && flag[i + 1][j] == num) {
-			next_i = i - 1;
-			next_j = j - 1;
-			return;
-		}
-		if (i < 19 && j > 0 && flag[i + 1][j - 1] == num) {
-			next_i = i - 1;
-			next_j = j - 1;
-			return;
-		}
-		if (i < 19 && j < 19 && flag[i + 1][j + 1] == num) {
-			next_i = i - 1;
-			next_j = j - 1;
-			return;
-		}
-	}
+	/*
+	 * public void get_nextPos(int i, int j, int num) { if (i > 0 && flag[i -
+	 * 1][j] == num) { next_i = i - 1; next_j = j; return; } if (i > 0 && j > 0
+	 * && flag[i - 1][j - 1] == num) { next_i = i - 1; next_j = j - 1; return; }
+	 * if (i > 0 && j < 19 && flag[i - 1][j + 1] == num) { next_i = i - 1;
+	 * next_j = j - 1; return; } if (j > 0 && flag[i][j - 1] == num) { next_i =
+	 * i - 1; next_j = j - 1; return; } if (j < 19 && flag[i][j + 1] == num) {
+	 * next_i = i - 1; next_j = j - 1; return; } if (i < 19 && flag[i + 1][j] ==
+	 * num) { next_i = i - 1; next_j = j - 1; return; } if (i < 19 && j > 0 &&
+	 * flag[i + 1][j - 1] == num) { next_i = i - 1; next_j = j - 1; return; } if
+	 * (i < 19 && j < 19 && flag[i + 1][j + 1] == num) { next_i = i - 1; next_j
+	 * = j - 1; return; } }
+	 */
+	// 急于写代码，考虑不周到，许多模块被迫重写，造成严重的时间浪费。
 
 	public void move() throws InterruptedException {
 		while (true) {
@@ -130,117 +101,220 @@ public class Operation {
 			}
 			case 5: {
 				moveInformation.setNum(0);
-				for(int i = 0;i < maxn; i++)
-					for(int j = 0;j < maxn; j++)
-						if(flag[i][j] != 0) {
-							flag[i][j] = 0; 
-							text[i][j].setBackground(Color.WHITE);
-						}
+				init(text);
 				display(text);
 			}// restart
 			default:
 				break;
 			}
 			Thread.currentThread();
-			Thread.sleep(500);
+			Thread.sleep(200);
 		}
 	}
 
-	public void turnUp(JLabel[][] text) throws InterruptedException { // 待修改
-		int temp = 1;
-		int now_i = pos_i;
-		int now_j = pos_j;
-		get_nextPos(now_i, now_j, ++temp);
-		flag[pos_i][pos_i] = 0;
-		text[pos_i][pos_j].setBackground(Color.WHITE);
-		flag[--pos_i][pos_j] = 1; // check
-		text[pos_i][pos_j].setBackground(Color.BLACK);
-		if (pos_i == 0)
-			return; // add 容错
-		while (temp++ < size) {
-			int to_i = now_i;
-			int to_j = now_j;
-			now_i = next_i;
-			now_j = next_j;
-			flag[now_i][now_j] = 0;
-			text[now_i][now_j].setBackground(Color.WHITE);
-			flag[to_i][to_j] = temp;
-			text[to_i][to_j].setBackground(Color.BLACK);
-			get_nextPos(now_i, now_j, temp);
+	public void eatFood(JLabel[][] text) {
+		int size;
+		if ((size = snakePos.size()) > 1) {
+			if (snakePos.get(size - 1).x - 1 > 0
+					&& flag[snakePos.get(size - 1).x - 1][snakePos
+							.get(size - 1).y] == 1) {
+				flag[snakePos.get(size - 1).x + 1][snakePos.get(size - 1).y] = 1;
+				Position rearPos = new Position(snakePos.get(size - 1).x + 1,
+						snakePos.get(size - 1).y);
+				snakePos.add(rearPos);
+				return;
+			} else if (snakePos.get(size - 1).x + 1 < 20
+					&& flag[snakePos.get(size - 1).x + 1][snakePos
+							.get(size - 1).y] == 1) {
+				flag[snakePos.get(size - 1).x - 1][snakePos.get(size - 1).y] = 1;
+				Position rearPos = new Position(snakePos.get(size - 1).x - 1,
+						snakePos.get(size - 1).y);
+				snakePos.add(rearPos);
+				return;
+			} else if (snakePos.get(size - 1).y - 1 > 0
+					&& flag[snakePos.get(size - 1).x][snakePos.get(size - 1).y - 1] == 1) {
+				flag[snakePos.get(size - 1).x][snakePos.get(size - 1).y + 1] = 1;
+				Position rearPos = new Position(snakePos.get(size - 1).x,
+						snakePos.get(size - 1).y + 1);
+				snakePos.add(rearPos);
+				return;
+			} else if (snakePos.get(size - 1).y + 1 < 20
+					&& flag[snakePos.get(size - 1).x][snakePos.get(size - 1).y + 1] == 1) {
+				flag[snakePos.get(size - 1).x][snakePos.get(size - 1).y - 1] = 1;
+				Position rearPos = new Position(snakePos.get(size - 1).x,
+						snakePos.get(size - 1).y - 1);
+				snakePos.add(rearPos);
+				return;
+			}
+		} else {
+			int num;
+			if ((num = moveInformation.getNum()) == 1) {
+				flag[snakePos.get(size - 1).x + 1][snakePos.get(size - 1).y] = 1;
+				Position rearPos = new Position(snakePos.get(size - 1).x + 1,
+						snakePos.get(size - 1).y);
+				snakePos.add(rearPos);
+				return;
+			} else if (num == 2) {
+				flag[snakePos.get(size - 1).x - 1][snakePos.get(size - 1).y] = 1;
+				Position rearPos = new Position(snakePos.get(size - 1).x - 1,
+						snakePos.get(size - 1).y);
+				snakePos.add(rearPos);
+				return;
+			} else if (num == 3) {
+				flag[snakePos.get(size - 1).x][snakePos.get(size - 1).y + 1] = 1;
+				Position rearPos = new Position(snakePos.get(size - 1).x,
+						snakePos.get(size - 1).y + 1);
+				snakePos.add(rearPos);
+				return;
+			} else {
+				flag[snakePos.get(size - 1).x][snakePos.get(size - 1).y - 1] = 1;
+				Position rearPos = new Position(snakePos.get(size - 1).x + 1,
+						snakePos.get(size - 1).y - 1);
+				snakePos.add(rearPos);
+				System.out.println(snakePos.size());
+				return;
+			}
 		}
+	}
+
+	public void turnUp(JLabel[][] text) throws InterruptedException {
+		int size = snakePos.size();
+		text[snakePos.get(size - 1).x][snakePos.get(size - 1).y]
+				.setBackground(Color.WHITE);
+		flag[snakePos.get(size - 1).x][snakePos.get(size - 1).y] = 0;
+		for (int i = size - 1; i > 0; i--) {
+			snakePos.get(i).x = snakePos.get(i - 1).x;
+			snakePos.get(i).y = snakePos.get(i - 1).y;
+		}
+		snakePos.get(0).x--;
+		if (snakePos.get(0).x < 0
+				|| flag[snakePos.get(0).x][snakePos.get(0).y] == 1) {
+			gameOver(text);
+			return;
+		}
+		text[snakePos.get(0).x][snakePos.get(0).y].setBackground(Color.BLACK);
+		if (flag[snakePos.get(0).x][snakePos.get(0).y] == -1) {
+			flag[snakePos.get(0).x][snakePos.get(0).y] = 1;
+			eatFood(text);
+			setFood(text);
+			return;
+		}
+		flag[snakePos.get(0).x][snakePos.get(0).y] = 1;
 	}
 
 	public void turnDown(JLabel[][] text) throws InterruptedException {
-		int temp = 1;
-		int now_i = pos_i;
-		int now_j = pos_j;
-		get_nextPos(now_i, now_j, ++temp);
-		flag[pos_i][pos_i] = 0;
-		text[pos_i][pos_j].setBackground(Color.WHITE);
-		flag[++pos_i][pos_j] = 1; // check
-		text[pos_i][pos_j].setBackground(Color.BLACK);
-		if (pos_i == 19)
-			return; // add 容错
-		while (temp++ < size) {
-			int to_i = now_i;
-			int to_j = now_j;
-			now_i = next_i;
-			now_j = next_j;
-			flag[now_i][now_j] = 0;
-			text[now_i][now_j].setBackground(Color.WHITE);
-			flag[to_i][to_j] = temp;
-			text[to_i][to_j].setBackground(Color.BLACK);
-			get_nextPos(now_i, now_j, temp);
+		int size = snakePos.size();
+		text[snakePos.get(size - 1).x][snakePos.get(size - 1).y]
+				.setBackground(Color.WHITE);
+		flag[snakePos.get(size - 1).x][snakePos.get(size - 1).y] = 0;
+		for (int i = size - 1; i > 0; i--) {
+			snakePos.get(i).x = snakePos.get(i - 1).x;
+			snakePos.get(i).y = snakePos.get(i - 1).y;
 		}
+		snakePos.get(0).x++;
+		if (snakePos.get(0).x == 20
+				|| flag[snakePos.get(0).x][snakePos.get(0).y] == 1) {
+			gameOver(text);
+			return;
+		}
+		text[snakePos.get(0).x][snakePos.get(0).y].setBackground(Color.BLACK);
+		if (flag[snakePos.get(0).x][snakePos.get(0).y] == -1) {
+			flag[snakePos.get(0).x][snakePos.get(0).y] = 1;
+			eatFood(text);
+			setFood(text);
+			return;
+		}
+		flag[snakePos.get(0).x][snakePos.get(0).y] = 1;
 	}
 
 	public void turnLeft(JLabel[][] text) throws InterruptedException {
-		int temp = 1;
-		int now_i = pos_i;
-		int now_j = pos_j;
-		get_nextPos(now_i, now_j, temp++);
-		flag[pos_i][pos_i] = 0;
-		text[pos_i][pos_j].setBackground(Color.WHITE);
-		flag[pos_i][--pos_j] = 1; // check
-		text[pos_i][pos_j].setBackground(Color.BLACK);
-		if (pos_j == 0)
-			return; // add 容错
-		while (temp++ < size) {
-			int to_i = now_i;
-			int to_j = now_j;
-			now_i = next_i;
-			now_j = next_j;
-			flag[now_i][now_j] = 0;
-			text[now_i][now_j].setBackground(Color.WHITE);
-			flag[to_i][to_j] = temp;
-			text[to_i][to_j].setBackground(Color.BLACK);
-			get_nextPos(now_i, now_j, temp);
+		int size = snakePos.size();
+		text[snakePos.get(size - 1).x][snakePos.get(size - 1).y]
+				.setBackground(Color.WHITE);
+		flag[snakePos.get(size - 1).x][snakePos.get(size - 1).y] = 0;
+		for (int i = size - 1; i > 0; i--) {
+			snakePos.get(i).x = snakePos.get(i - 1).x;
+			snakePos.get(i).y = snakePos.get(i - 1).y;
 		}
-
+		snakePos.get(0).y--;
+		if (snakePos.get(0).y < 0
+				|| flag[snakePos.get(0).x][snakePos.get(0).y] == 1) {
+			gameOver(text);
+			return;
+		}
+		text[snakePos.get(0).x][snakePos.get(0).y].setBackground(Color.BLACK);
+		if (flag[snakePos.get(0).x][snakePos.get(0).y] == -1) {
+			flag[snakePos.get(0).x][snakePos.get(0).y] = 1;
+			eatFood(text);
+			setFood(text);
+			return;
+		}
+		flag[snakePos.get(0).x][snakePos.get(0).y] = 1;
 	}
 
 	public void turnRight(JLabel[][] text) throws InterruptedException {
-		int temp = 1;
-		int now_i = pos_i;
-		int now_j = pos_j;
-		get_nextPos(now_i, now_j, ++temp);
-		flag[pos_i][pos_i] = 0;
-		text[pos_i][pos_j].setBackground(Color.WHITE);
-		flag[pos_i][++pos_j] = 1; // check
-		text[pos_i][pos_j].setBackground(Color.BLACK);
-		if (pos_j == 19)
-			return; // add 容错
-		while (temp++ < size) {
-			int to_i = now_i;
-			int to_j = now_j;
-			now_i = next_i;
-			now_j = next_j;
-			flag[now_i][now_j] = 0;
-			text[now_i][now_j].setBackground(Color.WHITE);
-			flag[to_i][to_j] = temp;
-			text[to_i][to_j].setBackground(Color.BLACK);
-			get_nextPos(now_i, now_j, temp);
+		int size = snakePos.size();
+		text[snakePos.get(size - 1).x][snakePos.get(size - 1).y]
+				.setBackground(Color.WHITE);
+		flag[snakePos.get(size - 1).x][snakePos.get(size - 1).y] = 0;
+		for (int i = size - 1; i > 0; i--) {
+			snakePos.get(i).x = snakePos.get(i - 1).x;
+			snakePos.get(i).y = snakePos.get(i - 1).y;
 		}
+		snakePos.get(0).y++;
+		if (snakePos.get(0).y == 20
+				|| flag[snakePos.get(0).x][snakePos.get(0).y] == 1) {
+			gameOver(text);
+			return;
+		}
+		text[snakePos.get(0).x][snakePos.get(0).y].setBackground(Color.BLACK);
+		if (flag[snakePos.get(0).x][snakePos.get(0).y] == -1) {
+			flag[snakePos.get(0).x][snakePos.get(0).y] = 1;
+			eatFood(text);
+			setFood(text);
+			return;
+		}
+		flag[snakePos.get(0).x][snakePos.get(0).y] = 1;
+	}
+
+	public void init(JLabel[][] text) {
+		for (int i = 0; i < maxn; i++)
+			for (int j = 0; j < maxn; j++)
+				if (flag[i][j] != 0) {
+					flag[i][j] = 0;
+					text[i][j].setBackground(Color.WHITE);
+				}
+		snakePos = new ArrayList<Position>();
+	}
+
+	public void gameOver(JLabel[][] text) throws InterruptedException {
+		init(text);
+		int temp = 5;
+		snakePos = new ArrayList<Position>();
+		text[8][temp++].setText("G");
+		text[8][temp++].setText("A");
+		text[8][temp++].setText("M");
+		text[8][temp++].setText("E");
+		text[8][temp++].setText("");
+		text[8][temp++].setText("O");
+		text[8][temp++].setText("V");
+		text[8][temp++].setText("E");
+		text[8][temp++].setText("R");
+		text[8][temp++].setText("!");
+		Thread.currentThread();
+		Thread.sleep(3000);
+		temp = 5;
+		text[8][temp++].setText("");
+		text[8][temp++].setText("");
+		text[8][temp++].setText("");
+		text[8][temp++].setText("");
+		text[8][temp++].setText("");
+		text[8][temp++].setText("");
+		text[8][temp++].setText("");
+		text[8][temp++].setText("");
+		text[8][temp++].setText("");
+		text[8][temp++].setText("");
+		moveInformation.setNum(5);// restart
 	}
 }
 // 食物被吃，flag变为3，蛇头随触发改方向，别的位置跟蛇头走

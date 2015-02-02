@@ -28,7 +28,8 @@ public class Frame extends JFrame {
 		super();
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		this.setTitle("JavaSnake");
-		this.setSize(520, 540);
+		// this.setSize(210, 210);
+		this.setBounds(500, 200, 418, 440);
 		setMainPanel();
 		setText();
 		operation = new Operation(text, maxn);
@@ -44,7 +45,6 @@ public class Frame extends JFrame {
 	public void setMainPanel() {
 		mainPanel = new JPanel();
 		mainPanel.setLayout(null);
-		mainPanel.setBounds(14, 85, 500, 500);
 		mainPanel.setLayout(null);
 		mainPanel.setFocusable(true);// @$@@!%@ what the hell?
 	}
@@ -54,7 +54,7 @@ public class Frame extends JFrame {
 		for (int i = 0; i < maxn; i++)
 			for (int j = 0; j < maxn; j++) {
 				text[i][j] = new JLabel();
-				text[i][j].setBounds(25 * j + 2, 25 * i, 25, 25);
+				text[i][j].setBounds(20 * j + 2, 20 * i, 20, 20);
 				text[i][j].setBackground(Color.WHITE);
 				text[i][j].setBorder(BorderFactory
 						.createLineBorder(Color.WHITE));
